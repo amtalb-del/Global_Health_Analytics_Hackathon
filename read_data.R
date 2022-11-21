@@ -36,7 +36,9 @@ disease_burden_df$Districts <- disease_burden_df$Districts %>% as.factor()
 disease_burden_df$year <- disease_burden_df$year %>% as.numeric()
 disease_burden_df$field <- disease_burden_df$field %>% as.factor()
 disease_burden_df$type <- disease_burden_df$type %>% as.factor()
-disease_burden_df$total <- disease_burden_df$total %>% as.factor()
+
+
+year_pop_df <- disease_burden_df %>% subset(field == "Total.population") %>% subset(year == 2022) %>% select(Regions, Districts, year, total)
 
 
 target_population_df <- read_excel(path, sheet="Target Population", skip=11, guess_max=20000)
@@ -59,6 +61,10 @@ per_diems_df <- read_excel(path, sheet="Per Diems", skip=7, guess_max=20000)
 transport_costs_df <- read_excel(path, sheet="Transport Costs", skip=12, guess_max=20000)
 gov_owned_vehicles_df <- transport_costs_df[,1:2]
 hired_vehicles_df <- transport_costs_df[,4:7]
+names(gov_owned_vehicles_df) <- str_replace(names(gov_owned_vehicles_df), "\\.\\.\\.[0-9]+$", "")
+names(hired_vehicles_df) <- str_replace(names(hired_vehicles_df), "\\.\\.\\.[0-9]+$", "")
+gov_owned_vehicles_df$type <- "gov"
+hired_vehicles_df$type <- "hired"
 
 
 other_df <- read_excel(path, sheet="Other", skip=2, col_names = F, guess_max=20000)
@@ -72,7 +78,7 @@ activity_df <- read_excel(path, sheet="Activity List", guess_max=20000)
 subactivity_df <- read_excel(path, sheet="Subactivity List", guess_max=20000)
 
 
-financing_activities_df <- read_excel(path, sheet="Financing of Activities", guess_max=20000)
+financing_activities_df <- read_excel(path, sheet="Financing of Activities", guess_max=20000, .name_repair = "universal")
 
 
 pc_cnames1 <- read_excel(path, sheet="PC-Drug Data", guess_max=20000) %>% names()
@@ -83,3 +89,4 @@ pc_drug_df <- read_excel(path, sheet="PC-Drug Data", skip=2, col_names=pc_cnames
 
 drug_needs_df <- read_excel(path, sheet="Drug Needs by District", guess_max=20000)
 drug_needs_df <- drug_needs_df[-c(1:2),]
+drug_needs_df <- drug_needs_df %>% separate(District, c("region", "district"), ": ")
